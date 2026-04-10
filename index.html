@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema BI — Evaluación Integral</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./estilos.css">
+</head>
+<style>
+    .req-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.req-modal-overlay.open { display: flex; }
+.req-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.75rem 2rem;
+}
+.req-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+.req-modal-id {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.req-modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+.req-modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.req-modal-close:hover { background: var(--surface); }
+.req-modal-divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+.req-modal-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.req-modal-pregunta {
+  background: var(--surface);
+  border-left: 3px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 1rem;
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0 0 1.25rem;
+  font-style: italic;
+}
+.req-modal-section { margin-bottom: 1.25rem; }
+.req-modal-body { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin: 0; }
+.req-modal-bullets { margin: 0; padding-left: 1.2rem; }
+.req-modal-bullets li { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 4px; }
+.req-modal-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+.req-modal-state.cumple { background: #d1fae5; color: #065f46; }
+.req-modal-state.parcial { background: #fef3c7; color: #92400e; }
+.req-modal-state.no { background: #fee2e2; color: #991b1b; }
+.req-modal-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.btn-ver-req {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-ver-req:hover { background: var(--surface); color: var(--fg); }
+</style>
+<body>
+
+<nav>
+  <div class="nav-logo">BI System</div>
+  <ul class="nav-links">
+    <li><a href="#problemas">Problemas</a></li>
+    <li><a href="#objetivos">Objetivos</a></li>
+    <li><a href="#arquitectura">Arquitectura</a></li>
+    <li><a href="#kpis">KPIs</a></li>
+    <li><a href="#requerimientos">Requerimientos</a></li>
+    <li><a href="#valor">Valor</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="border-bottom:1px solid var(--border); padding-bottom:4rem;">
+  <div class="hero-eyebrow">
+    <span>Sector logístico y transporte</span>
+  </div>
+  <h1>Evaluación <em>integral</em><br>del Sistema BI</h1>
+  <p class="hero-desc">Integración de datos empresariales dispersos en una plataforma centralizada de análisis que cubre comercial, operaciones, logística, finanzas, RRHH y telemetría.</p>
+  <div class="stack-row">
+    <span class="stack-pill hi">Airbyte</span>
+    <span class="stack-pill hi">Snowflake</span>
+    <span class="stack-pill hi">Python</span>
+    <span class="stack-pill hi">Power BI</span>
+    <span class="stack-pill">ERP</span>
+    <span class="stack-pill">GPS / Telemetría</span>
+    <span class="stack-pill">RRHH</span>
+    <span class="stack-pill">Finanzas</span>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num b">14</div>
+    <div class="stat-label">Requerimientos</div>
+    <div class="stat-sub">R1 → R14</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num g">3</div>
+    <div class="stat-label">Cumplidos</div>
+    <div class="stat-sub">R5, R7, R11</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num a">10</div>
+    <div class="stat-label">Parciales</div>
+    <div class="stat-sub">Oportunidades de mejora</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num r">1</div>
+    <div class="stat-label">No evidenciado</div>
+    <div class="stat-sub">R9 — facturación vs op.</div>
+  </div>
+</div>
+
+<!-- PROBLEMÁTICAS -->
+<section id="problemas">
+  <div class="sec-head">
+    <span class="sec-num">01 —</span>
+    <h2 class="sec-title">Problemáticas identificadas</h2>
+  </div>
+  <div class="problems-grid">
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(248,113,113,0.3); background:rgba(248,113,113,0.06);">🗂</div>
+      <h4>Fragmentación de datos</h4>
+      <p>Múltiples sistemas sin integración: ERP, GPS, ventas, RRHH operando de forma aislada.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.06);">🚛</div>
+      <h4>Visibilidad de flota</h4>
+      <p>Falta de integración entre datos operativos, financieros y de gestión de vehículos.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(248,113,113,0.3); background:rgba(248,113,113,0.06);">💸</div>
+      <h4>Control de costos</h4>
+      <p>Ausencia de análisis detallado de costos por ruta y viaje. Sin visibilidad operativa real.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(96,165,250,0.3); background:rgba(96,165,250,0.06);">📡</div>
+      <h4>Telemetría desaprovechada</h4>
+      <p>Grandes volúmenes de datos de sensores y GPS sin análisis ni integración al negocio.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.06);">📊</div>
+      <h4>Conversión comercial</h4>
+      <p>Falta de análisis de conversión en el proceso comercial, sin KPIs formales definidos.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(167,139,250,0.3); background:rgba(167,139,250,0.06);">👥</div>
+      <h4>RRHH desconectado</h4>
+      <p>Productividad del personal sin vinculación a resultados operativos o métricas de negocio.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon" style="border-color:rgba(45,212,191,0.3); background:rgba(45,212,191,0.06);">🗺</div>
+      <h4>Rentabilidad por ruta</h4>
+      <p>Limitaciones para analizar rentabilidad por cliente, ruta y segmento de manera integrada.</p>
+    </div>
+  </div>
+</section>
+
+<!-- OBJETIVOS -->
+<section id="objetivos">
+  <div class="sec-head">
+    <span class="sec-num">02 —</span>
+    <h2 class="sec-title">Objetivos del proyecto</h2>
+  </div>
+  <div class="obj-layout">
+    <div>
+      <div class="obj-general">
+        <div class="obj-general-tag">Objetivo general</div>
+        <p>Implementar un sistema de Business Intelligence que permita integrar, analizar y visualizar datos empresariales para mejorar la toma de decisiones a nivel estratégico, táctico y operativo.</p>
+      </div>
+    </div>
+    <div>
+      <ul class="obj-list">
+        <li class="obj-item">
+          <span class="obj-num">OE.01</span>
+          <p>Integrar múltiples fuentes de datos en un entorno centralizado y unificado.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.02</span>
+          <p>Analizar rentabilidad por cliente, ruta y segmento de negocio.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.03</span>
+          <p>Evaluar el cumplimiento de SLA en procesos logísticos por ruta y sucursal.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.04</span>
+          <p>Analizar costos operativos detallados por viaje, ruta y kilómetro.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.05</span>
+          <p>Monitorear telemetría de vehículos: alertas críticas, temperatura y señal GPS.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.06</span>
+          <p>Analizar el desempeño comercial e indicadores de conversión de oportunidades.</p>
+        </li>
+        <li class="obj-item">
+          <span class="obj-num">OE.07</span>
+          <p>Medir productividad del personal e integrarla con métricas operativas.</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ARQUITECTURA -->
+<section id="arquitectura">
+  <div class="sec-head">
+    <span class="sec-num">03 —</span>
+    <h2 class="sec-title">Arquitectura del sistema</h2>
+  </div>
+  <div class="arch-levels">
+    <div class="arch-level lv-strat">
+      <div class="arch-level-tag">
+        <span class="label">Nivel</span>
+        <span class="name">Estratégico</span>
+      </div>
+      <div class="arch-level-body">
+        <p>Análisis global del negocio orientado a la alta dirección. Permite evaluar el desempeño general de la empresa con una visión de largo plazo.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">Ingresos totales</span>
+          <span class="arch-tag">Crecimiento anual</span>
+          <span class="arch-tag">Clientes principales</span>
+          <span class="arch-tag">KPIs generales</span>
+          <span class="arch-tag">Dashboards 360°</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-level lv-tact">
+      <div class="arch-level-tag">
+        <span class="label">Nivel</span>
+        <span class="name">Táctico</span>
+      </div>
+      <div class="arch-level-body">
+        <p>Supervisión y control de operaciones por área funcional. Facilita decisiones de mediano plazo con enfoque en eficiencia y costos.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">Costos operativos</span>
+          <span class="arch-tag">Órdenes por ciudad</span>
+          <span class="arch-tag">Combustible</span>
+          <span class="arch-tag">Rendimiento por sucursal</span>
+          <span class="arch-tag">Ocupación de flota</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-level lv-oper">
+      <div class="arch-level-tag">
+        <span class="label">Nivel</span>
+        <span class="name">Operativo</span>
+      </div>
+      <div class="arch-level-body">
+        <p>Seguimiento diario de actividades logísticas y monitoreo en tiempo casi real. Apoya decisiones inmediatas del personal operativo.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">Envíos del día</span>
+          <span class="arch-tag">Entregas y devoluciones</span>
+          <span class="arch-tag">Telemetría en tiempo real</span>
+          <span class="arch-tag">Alertas críticas</span>
+          <span class="arch-tag">SLA por ruta</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÁREAS CUBIERTAS -->
+  <div style="margin-top:3rem;">
+    <p style="font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem;">Cobertura por área de negocio</p>
+    <div class="areas-grid">
+      <div class="area-card">
+        <div class="area-name">Comercial / Ventas</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:80%; background:var(--accent2);"></div></div>
+        <div class="area-pct">80%</div>
+      </div>
+      <div class="area-card">
+        <div class="area-name">Logística / Envíos</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:90%; background:var(--green);"></div></div>
+        <div class="area-pct">90%</div>
+      </div>
+      <div class="area-card">
+        <div class="area-name">Operaciones</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:85%; background:var(--green);"></div></div>
+        <div class="area-pct">85%</div>
+      </div>
+      <div class="area-card">
+        <div class="area-name">Finanzas</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:75%; background:var(--blue);"></div></div>
+        <div class="area-pct">75%</div>
+      </div>
+      <div class="area-card">
+        <div class="area-name">Recursos Humanos</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:60%; background:var(--amber);"></div></div>
+        <div class="area-pct">60%</div>
+      </div>
+      <div class="area-card">
+        <div class="area-name">Telemetría</div>
+        <div class="area-bar-wrap"><div class="area-bar-fill" style="width:70%; background:var(--amber);"></div></div>
+        <div class="area-pct">70%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KPIs -->
+<section id="kpis">
+  <div class="sec-head">
+    <span class="sec-num">04 —</span>
+    <h2 class="sec-title">KPIs del sistema</h2>
+  </div>
+  <div class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-card-label">Ingresos totales</div>
+      <div class="kpi-card-value">$∑</div>
+      <div class="kpi-card-area">comercial</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Ticket promedio</div>
+      <div class="kpi-card-value">$̄x</div>
+      <div class="kpi-card-area">comercial</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Conversión comercial</div>
+      <div class="kpi-card-value">%</div>
+      <div class="kpi-card-area">comercial</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Cumplimiento SLA</div>
+      <div class="kpi-card-value">SLA</div>
+      <div class="kpi-card-area">logística</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Costo por ruta/KM</div>
+      <div class="kpi-card-value">$/km</div>
+      <div class="kpi-card-area">operaciones</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Ocupación de flota</div>
+      <div class="kpi-card-value">OCC</div>
+      <div class="kpi-card-area">operaciones</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Días de mora (DSO)</div>
+      <div class="kpi-card-value">DSO</div>
+      <div class="kpi-card-area">finanzas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Costos laborales</div>
+      <div class="kpi-card-value">$HR</div>
+      <div class="kpi-card-area">rrhh</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Alertas telemetría</div>
+      <div class="kpi-card-value">ALT</div>
+      <div class="kpi-card-area">telemetría</div>
+    </div>
+  </div>
+</section>
+
+<!-- REQUERIMIENTOS -->
+<section id="requerimientos">
+  <div class="sec-head">
+    <span class="sec-num">05 —</span>
+    <h2 class="sec-title">Evaluación R1 — R14</h2>
+  </div>
+  <div class="req-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Req</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Soporte en BI</th>
+          <th>Pendiente</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>R1</td>
+          <td>Ingresos por segmento</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Dashboard por ciudad y segmento</td>
+          <td style="color:var(--muted); font-size:12px;">Falta volumen detallado</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R1')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R2</td>
+          <td>Conversión comercial</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Órdenes vs envíos</td>
+          <td style="color:var(--muted); font-size:12px;">Falta KPI formal</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R2')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R3</td>
+          <td>Tarifarios</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Ingreso por tipo tarifario</td>
+          <td style="color:var(--muted); font-size:12px;">Falta análisis por peso</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R3')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R4</td>
+          <td>Riesgo crediticio</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Monto reservado crédito</td>
+          <td style="color:var(--muted); font-size:12px;">Falta profundidad analítica</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R4')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R5</td>
+          <td>SLA logístico</td>
+          <td><span class="badge cumple">Cumple</span></td>
+          <td>SLA por ruta y sucursal</td>
+          <td style="color:var(--muted); font-size:12px;">—</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R5')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R6</td>
+          <td>Uso de flota</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Ocupación de vehículos</td>
+          <td style="color:var(--muted); font-size:12px;">Falta identificar subutilización</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R6')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R7</td>
+          <td>Costos operativos</td>
+          <td><span class="badge cumple">Cumple</span></td>
+          <td>Costos por ruta y KM</td>
+          <td style="color:var(--muted); font-size:12px;">—</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R7')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R8</td>
+          <td>Telemetría básica</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Alertas y eventos GPS</td>
+          <td style="color:var(--muted); font-size:12px;">Falta análisis predictivo</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R8')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R9</td>
+          <td>Facturación vs operación</td>
+          <td><span class="badge no">No cumple</span></td>
+          <td>No evidenciado</td>
+          <td style="color:var(--red); font-size:12px;">Sin implementación</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R9')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R10</td>
+          <td>Cartera vencida</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Mora promedio (DSO)</td>
+          <td style="color:var(--muted); font-size:12px;">Falta segmentación avanzada</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R10')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R11</td>
+          <td>Eficiencia de cobranza</td>
+          <td><span class="badge cumple">Cumple</span></td>
+          <td>Métodos de pago e indicadores</td>
+          <td style="color:var(--muted); font-size:12px;">—</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R11')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R12</td>
+          <td>RRHH</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Costos y ausentismo</td>
+          <td style="color:var(--muted); font-size:12px;">Falta integración productividad</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R12')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R13</td>
+          <td>Calidad telemetría</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Eventos y señal GPS</td>
+          <td style="color:var(--muted); font-size:12px;">Falta modelado predictivo</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R13')">Ver más</button></td>
+        </tr>
+        <tr>
+          <td>R14</td>
+          <td>Riesgo mecánico</td>
+          <td><span class="badge parcial">Parcial</span></td>
+          <td>Temperatura motor</td>
+          <td style="color:var(--muted); font-size:12px;">Falta análisis predictivo</td>
+          <td><button class="btn-ver-req" onclick="openReqModal('R14')">Ver más</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL -->
+  <div id="req-modal-overlay" class="req-modal-overlay" onclick="if(event.target===this)closeReqModal()">
+    <div class="req-modal">
+      <div class="req-modal-head">
+        <div>
+          <p class="req-modal-id" id="modal-id"></p>
+          <h3 class="req-modal-title" id="modal-title"></h3>
+        </div>
+        <button class="req-modal-close" onclick="closeReqModal()">&#10005;</button>
+      </div>
+      <div id="modal-state-row" style="margin-bottom:1rem;"></div>
+      <hr class="req-modal-divider">
+      <div class="req-modal-section">
+        <p class="req-modal-label">Pregunta clave</p>
+        <div class="req-modal-pregunta" id="modal-pregunta"></div>
+      </div>
+      <div class="req-modal-section">
+        <p class="req-modal-label">Requerimiento</p>
+        <p class="req-modal-body" id="modal-req"></p>
+      </div>
+      <div class="req-modal-section">
+        <p class="req-modal-label">El dashboard debe responder</p>
+        <ul class="req-modal-bullets" id="modal-preguntas"></ul>
+      </div>
+      <div class="req-modal-section">
+        <p class="req-modal-label">Soporte actual en BI</p>
+        <p class="req-modal-body" id="modal-bi"></p>
+      </div>
+      <div id="modal-pendiente-wrap" class="req-modal-section">
+        <p class="req-modal-label">Pendiente</p>
+        <p class="req-modal-body" id="modal-pendiente"></p>
+      </div>
+    </div>
+  </div>
+
+</section>
+<!-- RESOLUCIÓN DE PROBLEMÁTICAS -->
+<section id="resolucion">
+  <div class="sec-head">
+    <span class="sec-num">06 —</span>
+    <h2 class="sec-title">Resolución de problemáticas</h2>
+  </div>
+  <div class="resolution-grid">
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">Fragmentación de datos</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">Dashboards centralizados en Power BI</div>
+      <div class="res-desc">ERP, GPS, RRHH y ventas integrados en una sola plataforma vía Airbyte + Snowflake.</div>
+    </div>
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">Falta de visibilidad operativa</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">Monitoreo en tiempo casi real</div>
+      <div class="res-desc">Panel operativo con envíos, entregas y telemetría actualizada diariamente.</div>
+    </div>
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">Sin control de costos</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">Análisis por ruta y viaje</div>
+      <div class="res-desc">Costo por KM, costo por ruta y consumo de combustible disponibles en dashboards tácticos.</div>
+    </div>
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">Telemetría desaprovechada</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">Integración de eventos y alertas</div>
+      <div class="res-desc">Alertas críticas, temperatura de motor y señal GPS integrados al análisis operativo.</div>
+    </div>
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">Rentabilidad sin análisis</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">Dashboards comerciales 360°</div>
+      <div class="res-desc">Vista de rentabilidad por cliente, segmento y ruta con indicadores de conversión.</div>
+    </div>
+    <div class="res-card">
+      <div class="res-from">Problema</div>
+      <div style="font-size:14px; color:var(--text); font-weight:600;">RRHH desconectado</div>
+      <div class="res-arrow">↓</div>
+      <div class="res-to">KPIs de costos y ausentismo</div>
+      <div class="res-desc">Costos laborales y ausentismo integrados. Pendiente: vinculación con productividad.</div>
+    </div>
+  </div>
+</section>
+
+<!-- VALOR ESTRATÉGICO -->
+<section id="valor">
+  <div class="sec-head">
+    <span class="sec-num">07 —</span>
+    <h2 class="sec-title">Valor estratégico</h2>
+  </div>
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="value-card-num">01</div>
+      <h4>Decisiones basadas en datos</h4>
+      <p>Reemplaza el modelo reactivo por uno proactivo. La información consolidada permite actuar antes de que los problemas escalen.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-num">02</div>
+      <h4>Visión 360° del negocio</h4>
+      <p>Dashboards de Cliente, Empleado y Vehículo integrados en un solo entorno analítico. Sin silos de información.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-num">03</div>
+      <h4>Reducción de costos operativos</h4>
+      <p>Análisis detallado por ruta y viaje identifica ineficiencias. Optimización de flota y consumo de combustible.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-num">04</div>
+      <h4>Mejora en eficiencia logística</h4>
+      <p>SLA monitoreado por ruta y sucursal. Visibilidad de entregas, devoluciones y cumplimiento en tiempo real.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-num">05</div>
+      <h4>Base para analítica avanzada</h4>
+      <p>Arquitectura preparada para modelos predictivos en telemetría, riesgo mecánico y comportamiento de flota.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-num">06</div>
+      <h4>Transformación digital</h4>
+      <p>El sistema constituye la base de datos unificada que habilita la digitalización de procesos en toda la organización.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSIÓN -->
+<section id="conclusion" style="border-bottom:none;">
+  <div class="sec-head">
+    <span class="sec-num">08 —</span>
+    <h2 class="sec-title">Conclusión</h2>
+  </div>
+  <div class="conclusion-block">
+    <div class="conclusion-tag">Resultado final del proyecto</div>
+    <h3>Un sistema sólido, funcional y listo para evolucionar.</h3>
+    <p>El sistema de Business Intelligence implementado cumple de manera significativa con los objetivos planteados, resolviendo la problemática central de fragmentación de datos y habilitando un análisis integral del negocio en seis áreas funcionales clave.</p>
+    <p>De 14 requerimientos definidos, 3 se cumplen completamente (SLA logístico, costos operativos y eficiencia de cobranza), 10 están parcialmente implementados representando oportunidades concretas de evolución, y 1 permanece sin evidencia de implementación (R9 — relación facturación vs operación cerrada).</p>
+    <p>Los requerimientos parciales señalan el camino natural hacia analítica avanzada: modelos predictivos para telemetría y riesgo mecánico, segmentación avanzada de cartera vencida, y una integración más profunda entre RRHH y productividad operativa. El sistema constituye una base sólida para la transformación digital de la organización.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Sistema BI — Sector Logístico y Transporte</span>
+  <span>Stack: Airbyte · Snowflake · Python · Power BI</span>
+</footer>
+<script>
+    const REQ_DATA = {
+  R1: {
+    id: "R1-COM", area: "Área Comercial",
+    title: "Análisis de ingresos y volumen por segmento",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Actualmente se vende a segmentos con comportamientos distintos (ventanilla y corporativo), pero no existe visibilidad consolidada de qué segmento realmente aporta más valor. ¿Cómo identificar con claridad qué segmentos, rutas y periodos generan mayor ingreso en BOB y mayor volumen de carga?",
+    req: "Analizar orden_servicio y envio para medir ingresos y volumen por segmento, ruta y periodo.",
+    preguntas: ["¿Qué segmento genera mayor ingreso mensual y trimestral?","¿Qué rutas origen-destino concentran mayor facturación y mayor peso (kg)?","¿Cómo evoluciona el ticket promedio por segmento?"],
+    bi: "Dashboard por ciudad y segmento disponible parcialmente.",
+    pendiente: "Falta volumen detallado por ruta y análisis comparativo entre periodos."
+  },
+  R2: {
+    id: "R2-COM", area: "Área Comercial",
+    title: "Conversión de órdenes a envíos",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "El flujo comercial pierde eficiencia cuando una orden se aprueba pero no se ejecuta logísticamente. ¿Cómo medir cuántas órdenes aprobadas se convierten en envíos reales y cuántas se vencen sin ejecución para reducir fugas comerciales?",
+    req: "Medir conversión de orden_servicio a envio por estado y vigencia.",
+    preguntas: ["¿Qué porcentaje de órdenes APROBADAS termina en envío?","¿Cuántas órdenes vencen sin ejecución?","¿Cuál es el tiempo promedio entre creación de orden y registro de envío?"],
+    bi: "Comparación órdenes vs envíos parcialmente visualizada.",
+    pendiente: "Falta KPI formal de tasa de conversión y alertas por órdenes vencidas."
+  },
+  R3: {
+    id: "R3-COM", area: "Área Comercial",
+    title: "Rendimiento de tarifarios y rangos de peso",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Se cuenta con diferentes reglas tarifarias y rangos de peso, pero no hay evidencia consolidada de cuáles generan mejor resultado comercial. ¿Qué combinaciones de tipo tarifario, tipo de carga y rango de peso aportan más ingresos?",
+    req: "Evaluar desempeño de tarifario y tarifario_detalle contra ingresos reales en orden_servicio.",
+    preguntas: ["¿Qué tipo de tarifario (VENTANILLA/CONTRATO) genera más ingresos?","¿Qué rangos de peso son los más vendidos?","¿Qué rutas tienen mayor rendimiento por regla tarifaria?"],
+    bi: "Ingreso por tipo tarifario disponible a nivel general.",
+    pendiente: "Falta análisis por rango de peso y cruce con rutas específicas."
+  },
+  R4: {
+    id: "R4-COM", area: "Área Comercial",
+    title: "Riesgo de crédito comercial B2B",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "El crédito impulsa ventas corporativas, pero también incrementa exposición financiera cuando se acerca al límite o crece la mora. ¿Cómo monitorear el uso de líneas de crédito y reservas para vender más sin elevar el riesgo comercial?",
+    req: "Monitorear cuenta_credito_cliente, reserva_credito y órdenes asociadas para control de exposición.",
+    preguntas: ["¿Qué clientes consumen más del 80% de su crédito disponible?","¿Qué monto está reservado y aún no convertido en ingreso?","¿Qué clientes concentran mayor saldo vencido?"],
+    bi: "Monto reservado en crédito visualizado.",
+    pendiente: "Falta profundidad analítica: alertas por umbral, historial y segmentación de riesgo."
+  },
+  R5: {
+    id: "R5-OPS", area: "Área Operaciones Logísticas",
+    title: "Cumplimiento de SLA de recojo en oficina",
+    estado: "cumple", estadoLabel: "Cumple",
+    pregunta: "El servicio prometido se basa en tener el envío listo para recojo dentro del tiempo comprometido. ¿Cómo medir, por sucursal y ruta, el cumplimiento real del SLA para detectar incumplimientos antes de afectar la satisfacción del cliente?",
+    req: "Contrastar fecha_compromiso_listo_recojo con el cierre de estado/evento en evento_envio.",
+    preguntas: ["¿Cuál es el porcentaje de cumplimiento de SLA por sucursal destino?","¿Qué rutas tienen mayor desviación de tiempo?","¿Qué tipo de carga incumple más el tiempo prometido?"],
+    bi: "SLA por ruta y sucursal implementado y evidenciado.",
+    pendiente: null
+  },
+  R6: {
+    id: "R6-OPS", area: "Área Operaciones Logísticas",
+    title: "Eficiencia de capacidad de flota",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Sin control de ocupación, la flota puede operar subutilizada o con sobrecarga, impactando costos y riesgo operativo. ¿Cómo identificar viajes y tramos con mala utilización de capacidad para optimizar planificación?",
+    req: "Comparar capacidad del vehículo vs peso asignado por viaje/tramo usando vehiculo, viaje_carga_resumen y envio_viaje_tramo.",
+    preguntas: ["¿Cuál es la ocupación promedio por ruta y por vehículo?","¿En qué viajes hubo sobrecapacidad?","¿Qué tramos operan de forma recurrente por debajo de la capacidad óptima?"],
+    bi: "Ocupación de vehículos disponible de forma básica.",
+    pendiente: "Falta identificar tramos subutilizados de forma recurrente y generar alertas."
+  },
+  R7: {
+    id: "R7-OPS", area: "Área Operaciones Logísticas",
+    title: "Costos operativos por viaje y ruta",
+    estado: "cumple", estadoLabel: "Cumple",
+    pregunta: "El gasto operativo no siempre se distribuye de forma equilibrada entre rutas y unidades. ¿Cómo detectar qué rutas, viajes y vehículos consumen más recursos para reducir costos sin comprometer el nivel de servicio?",
+    req: "Consolidar costos de viaje_gasto_operativo y viaje_liquidacion por ruta, vehículo y periodo.",
+    preguntas: ["¿Qué rutas tienen mayor costo operativo total?","¿Cuál es el costo promedio por viaje y por kilómetro?","¿Qué vehículos presentan mayor gasto recurrente?"],
+    bi: "Costos por ruta y KM implementados y evidenciados.",
+    pendiente: null
+  },
+  R8: {
+    id: "R8-OPS", area: "Área Operaciones Logísticas",
+    title: "Trazabilidad y riesgos con telemetría",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Los eventos logísticos y alertas GPS muestran señales tempranas de retraso o riesgo, pero suelen verse de forma aislada. ¿Cómo integrar trazabilidad y telemetría para identificar cuellos de botella y conductas de riesgo?",
+    req: "Integrar evento_envio, gps_track y gps_alerta para análisis por sucursal, ruta, viaje y conductor.",
+    preguntas: ["¿Qué sucursales tienen más tiempo entre eventos críticos?","¿Qué tipos de alerta GPS son más frecuentes por ruta?","¿Qué conductores concentran mayor incidencia de alertas críticas?"],
+    bi: "Alertas y eventos GPS visualizados de manera básica.",
+    pendiente: "Falta análisis predictivo y cruce entre telemetría y desempeño logístico."
+  },
+  R9: {
+    id: "R9-FIN", area: "Área Financiera",
+    title: "Cobertura de facturación sobre operación cerrada",
+    estado: "no", estadoLabel: "No cumple",
+    pregunta: "Si la operación se cierra pero no se factura oportunamente, se genera pérdida de liquidez y distorsión de resultados. ¿Cómo controlar la brecha entre envíos cerrados y líneas efectivamente facturadas en cada cierre mensual?",
+    req: "Comparar envíos cerrados vs factura_detalle para detectar no facturados y estimar monto pendiente.",
+    preguntas: ["¿Cuántos envíos cerrados no tienen línea de factura?","¿Cuál es el monto pendiente de facturar por mes?","¿Qué clientes concentran mayor pendiente de facturación?"],
+    bi: "No evidenciado en el dashboard actual.",
+    pendiente: "Sin implementación. Requiere cruce entre cierre operativo y módulo de facturación."
+  },
+  R10: {
+    id: "R10-FIN", area: "Área Financiera",
+    title: "Antigüedad de cartera y riesgo de mora",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "La mora afecta caja, capacidad de operación y crecimiento comercial. ¿Cómo clasificar la cartera por antigüedad para identificar clientes y segmentos de mayor riesgo y priorizar acciones de cobranza?",
+    req: "Clasificar facturas por tramos de mora con fecha_emision, fecha_vencimiento, estado_cobro y pagos recibidos.",
+    preguntas: ["¿Cuál es el saldo vencido total y su tendencia mensual?","¿Qué clientes concentran mora >30, >60 y >90 días?","¿Qué porcentaje de la facturación está en estado VENCIDO?"],
+    bi: "Mora promedio (DSO) disponible.",
+    pendiente: "Falta segmentación avanzada por tramos y priorización de clientes por riesgo."
+  },
+  R11: {
+    id: "R11-FIN", area: "Área Financiera / Cobranza",
+    title: "Eficiencia de cobranza (DSO y métodos de pago)",
+    estado: "cumple", estadoLabel: "Cumple",
+    pregunta: "No todos los métodos de cobro tienen el mismo impacto en tiempo de recuperación de efectivo. ¿Cómo medir el DSO y el desempeño por método de pago para mejorar políticas de cobranza y flujo de caja?",
+    req: "Medir tiempos de cobro con factura y pago, segmentando por metodo_pago y cliente.",
+    preguntas: ["¿Cuál es el DSO promedio por mes?","¿Qué método de pago tiene menor tiempo promedio de cobro?","¿Qué clientes presentan mayor proporción de pagos tardíos?"],
+    bi: "Métodos de pago e indicadores de cobranza implementados.",
+    pendiente: null
+  },
+  R12: {
+    id: "R12-RRHH", area: "Área RRHH",
+    title: "Costo laboral, asistencia y productividad",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "El costo de personal debe estar alineado al desempeño operativo. ¿Cómo evaluar, por sucursal y área, la relación entre nómina, asistencia, horas extra y productividad real?",
+    req: "Cruzar nomina, asistencia_empleado y resultados operativos para indicadores de costo y rendimiento laboral.",
+    preguntas: ["¿Qué sucursales tienen mayor costo laboral mensual?","¿Cómo evolucionan ausentismo y horas extra por área?","¿Cómo se relaciona el costo laboral con los resultados operativos y de facturación?"],
+    bi: "Costos y ausentismo disponibles.",
+    pendiente: "Falta integración entre costo laboral y métricas de productividad operativa."
+  },
+  R13: {
+    id: "R13-TEL", area: "Área Telemetría GPS",
+    title: "Calidad e integridad de datos telemétricos",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Si los dispositivos GPS envían datos incompletos o con cortes, los indicadores de operación y seguridad pierden confiabilidad. ¿Cómo controlar de forma continua la calidad de la telemetría por vehículo y ruta?",
+    req: "Monitorear cobertura, frecuencia y continuidad de gps_track y gps_alerta por vehículo/viaje, identificando huecos de transmisión.",
+    preguntas: ["¿Qué porcentaje de viajes tiene telemetría completa vs incompleta?","¿Qué vehículos presentan más interrupciones de señal por semana?","¿En qué rutas/sucursales se concentra la mayor pérdida de datos GPS?"],
+    bi: "Eventos y señal GPS monitoreados parcialmente.",
+    pendiente: "Falta modelado predictivo y clasificación de calidad por vehículo/ruta."
+  },
+  R14: {
+    id: "R14-TEL", area: "Área Telemetría GPS",
+    title: "Riesgo mecánico temprano por temperatura y alertas",
+    estado: "parcial", estadoLabel: "Parcial",
+    pregunta: "Las alertas de motor y temperatura pueden anticipar fallas costosas antes de que ocurran paradas no planificadas. ¿Cómo detectar patrones de riesgo mecánico temprano para programar mantenimiento preventivo oportuno?",
+    req: "Integrar gps_track.temp_motor_c, gps_alerta.tipo_alerta y mantenimiento_vehiculo para identificar vehículos y rutas con comportamiento anómalo.",
+    preguntas: ["¿Qué vehículos superan con mayor frecuencia umbrales críticos de temperatura?","¿Qué tipo de alerta antecede más a mantenimientos correctivos?","¿Qué rutas presentan mayor incidencia de alertas mecánicas?"],
+    bi: "Temperatura de motor y alertas básicas disponibles.",
+    pendiente: "Falta análisis predictivo y correlación con historial de mantenimiento."
+  }
+};
+
+function openReqModal(key) {
+  const d = REQ_DATA[key];
+  if (!d) return;
+  document.getElementById('modal-id').textContent = d.id + ' — ' + d.area;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-pregunta').textContent = d.pregunta;
+  document.getElementById('modal-req').textContent = d.req;
+  document.getElementById('modal-preguntas').innerHTML = d.preguntas.map(p => `<li>${p}</li>`).join('');
+  document.getElementById('modal-bi').textContent = d.bi;
+  document.getElementById('modal-pendiente').textContent = d.pendiente || '—';
+  document.getElementById('modal-pendiente-wrap').style.display = d.pendiente ? 'block' : 'none';
+  document.getElementById('modal-state-row').innerHTML =
+    `<span class="req-modal-state ${d.estado}"><span class="req-modal-dot"></span>${d.estadoLabel}</span>`;
+  document.getElementById('req-modal-overlay').classList.add('open');
+}
+function closeReqModal() {
+  document.getElementById('req-modal-overlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReqModal(); });
+</script>
+</body>
+</html>
